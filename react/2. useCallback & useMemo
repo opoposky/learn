@@ -1,0 +1,31 @@
+## [https://react.dev/reference/react/useCallback](useCallback) & [https://react.dev/reference/react/useMemo](useMemo)
+
+这两个 api 其实挺容易理解的 
+
+useMemo 理解为 `vue` 的 `computed` 都是建立一个带索引的值
+
+useCallback 则有点像 useMemo 但他返回的是一个 ` function ` 
+
+那为什么把这两个函数放一起呢？ 因为 useMemo 在某些场合下会无效！
+
+简单的说 在 `react` 没有 `keep-alive` 这种功能
+每一次的数据变化 都会导致 ` rander ` 而 render 会不断的往里深入 直至所有的组件更新完毕
+
+这时候我们就需要  `useMemo`  来处理这个问题了。
+`useMemo` 并不只是只允许处理` 值 `,而 jsx 其实也是值。
+
+所以 useMemo 缓存jsx作为值 这样就不会因为一些没关联的改变导致值的变化了。
+
+
+但是有一个问题 也是特殊场景的问题
+
+props 中传递了 function 呢？
+
+function 因为 memo 的原因被固定了 所以无法更新 这时候我们就需要useCallback
+
+props 中传递 function 的时候 传递 useCallback function 
+这样即使 memo 缓存的 function 就会被自动更新了。
+
+这就是 useCallback 存在的最大意义。
+
+当然减少开销 也是一个很大的意义。
