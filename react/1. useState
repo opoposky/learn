@@ -1,3 +1,105 @@
 ## [https://react.dev/reference/react/useState](useState)
 
 关于react 中的 useState 我有话要说
+
+首先明确一点 useState 是一个基础并且非常简单的 api 。
+
+但是该 api 与 class（类） 使用的时候有完全不同的结果
+
+我们都知道 class 直接可以定义 state 然后通过 this.setState 来处理该参数
+而 hooks 版本的处理 useState 在处理的时候 是通过 [state,setState] 解构的第二参数来改变第一参数
+
+在使用上其实差别并不大 ， 但 class（类）this.setState 和 setState 是有差别的：
+
+同样的我们写同样的案例
+
+```js
+// react class 
+  class Test{
+    state = {
+      count:0,
+      name:'test'
+    };
+    render(){
+      const addCount = ()=>this.setState({count:this.state.count+1});
+      const str = Object.entries(this.state).map(([k,v])=>`${k}:${v}`).join(',')
+      return (<>
+            <button onClick={addCount}>{str}</button>
+          </>)
+    }
+  }
+
+// react useState
+
+  function Test(){
+    const [state,setState] = useState({count:0,name:'test'});
+    const addCount = ()=>setState({count:state.count+1});
+    const str = Object.entries(state).map(([k,v])=>`${k}:${v}`).join(',')
+      return (<>
+            <button onClick={addCount}>{str}</button>
+          </>)
+  }
+```
+
+在这两个里面 如果跑起来 useState 一定会出现不一样的结果 
+因为 `this.setate` 在处理state时 会`自动合并！` 仅更新指定的字段！
+而 `useState` 中没有解构处理 导致 ` name ` 字段会丢失！
+你以为 `解构` 就可以解决这个问题了对吧？ 我相信大多数人都这样认为的
+也就是修改一下
+
+```js
+    // const addCount = ()=>setState({count:state.count+1,});
+    const addCount = ()=>setState({count:state.count+1,...state});
+```
+这样确实是解决了当下的问题，但接下来我们在处理多状态就会有问题了
+
+```js
+// class
+const addCount = async () => {
+  await this.setState({count:this.state.count+1});
+  console.log(`change 1`)
+  await this.setState({name:'class test'});
+  console.log(`change 2`)
+}
+
+// hooks
+const addCount = async () => {
+  await setState({count:state.count+1,...state});
+  console.log(`change 1`)
+  await setState({name:'hooks test',...state});
+  console.log(`change 2`)
+}
+```
+不要觉得这种状态很少，其实在我们使用 `loading` 状态的时候是非常常见的!就像这样
+
+```js
+const GetDate = async () => {
+  // loading = true
+  await fetch(api)
+  // loading = false
+}
+```
+虽然在 hooks 中可以把 loading 单独处理出来 但这样无疑提高了我们的开发成本
+
+所以在这种时候还是需要处理 
+
+```js
+const GetDate = async () => {
+  // loading = true
+  setState((state)=>({...state,loading:true}))
+  await fetch(api)
+  // loading = false
+  setState((state)=>({...state,loading:false}))
+}
+```
+
+这样使用我们就将所有的 `state` 状态合并了！
+
+意外覆盖是常见的 所以我们尽可能要使用这种方式来处理 hooks 的状态合并问题！
+
+
+
+
+
+
+
